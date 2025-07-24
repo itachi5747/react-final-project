@@ -1,50 +1,39 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, { useReducer, createContext, useContext } from 'react';
+import { cartReducer, cartActions, cartSelectors } from './cartslice.jsx';
 
 // Context for cart management
 const CartContext = createContext();
 
 // Cart Provider Component
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState({});
+  const [cart, dispatch] = useReducer(cartReducer, {});
 
   const addToCart = (plant) => {
-    setCart(prev => ({
-      ...prev,
-      [plant.id]: {
-        ...plant,
-        quantity: (prev[plant.id]?.quantity || 0) + 1
-      }
-    }));
+    dispatch(cartActions.addToCart(plant));
   };
 
   const updateQuantity = (plantId, newQuantity) => {
-    if (newQuantity <= 0) {
-      removeFromCart(plantId);
-    } else {
-      setCart(prev => ({
-        ...prev,
-        [plantId]: {
-          ...prev[plantId],
-          quantity: newQuantity
-        }
-      }));
-    }
+    dispatch(cartActions.updateQuantity(plantId, newQuantity));
   };
 
   const removeFromCart = (plantId) => {
-    setCart(prev => {
-      const newCart = { ...prev };
-      delete newCart[plantId];
-      return newCart;
-    });
+    dispatch(cartActions.removeFromCart(plantId));
+  };
+
+  const clearCart = () => {
+    dispatch(cartActions.clearCart());
   };
 
   const getTotalItems = () => {
-    return Object.values(cart).reduce((total, item) => total + item.quantity, 0);
+    return cartSelectors.getTotalItems(cart);
   };
 
   const getTotalCost = () => {
-    return Object.values(cart).reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartSelectors.getTotalCost(cart);
+  };
+
+  const getCartItems = () => {
+    return cartSelectors.getCartItems(cart);
   };
 
   return (
@@ -53,8 +42,10 @@ export const CartProvider = ({ children }) => {
       addToCart,
       updateQuantity,
       removeFromCart,
+      clearCart,
       getTotalItems,
-      getTotalCost
+      getTotalCost,
+      getCartItems
     }}>
       {children}
     </CartContext.Provider>

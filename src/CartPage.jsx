@@ -6,8 +6,8 @@ import { useCart } from './store.jsx';
 
 // Cart Page Component
 const CartPage = ({ onNavigate }) => {
-  const { cart, getTotalItems, getTotalCost } = useCart();
-  const cartItems = Object.values(cart);
+  const { getCartItems, getTotalItems, getTotalCost } = useCart();
+  const cartItems = getCartItems();
   const totalItems = getTotalItems();
   const totalCost = getTotalCost();
 
